@@ -1,16 +1,19 @@
 PACKAGE = libseccomp
 ORG = amylum
 
+DEP_DIR = /tmp/dep-dir
+
 BUILD_DIR = /tmp/$(PACKAGE)-build
 RELEASE_DIR = /tmp/$(PACKAGE)-release
 RELEASE_FILE = /tmp/$(PACKAGE).tar.gz
 PATH_FLAGS = --prefix=/usr
+CFLAGS = -I$(DEP_DIR)/usr/include
 
 PACKAGE_VERSION = $$(git --git-dir=upstream/.git describe --tags | sed 's/v//')
 PATCH_VERSION = $$(cat version)
 VERSION = $(PACKAGE_VERSION)-$(PATCH_VERSION)
 
-.PHONY : default submodule manual container build version push local
+.PHONY : default submodule manual container deps build version push local
 
 default: submodule container
 
@@ -23,16 +26,19 @@ manual: submodule
 container:
 	./meta/launch
 
-build: submodule
+deps:
+	rm -rf $(DEP_DIR)
+	mkdir -p $(DEP_DIR)/usr/include/
+	cp -R /usr/include/{linux,asm,asm-generic} $(DEP_DIR)/usr/include/
+
+build: submodule deps
 	rm -rf $(BUILD_DIR)
 	cp -R upstream $(BUILD_DIR)
 	cd $(BUILD_DIR) && ./autogen.sh
-	cd $(BUILD_DIR) && CC=musl-gcc ./configure
-	make -C $(BUILD_DIR)
+	cd $(BUILD_DIR) && CC=musl-gcc CFLAGS='$(CFLAGS)' ./configure $(PATH_FLAGS)
+	make -C $(BUILD_DIR) DESTDIR=$(RELEASE_DIR) install
 	mkdir -p $(RELEASE_DIR)/usr/share/licenses/$(PACKAGE)
 	cp upstream/LICENSE $(RELEASE_DIR)/usr/share/licenses/$(PACKAGE)/LICENSE
-	mkdir -p $(RELEASE_DIR)/usr/bin
-	cp $(BUILD_DIR)/src/github.com/docker/containerd/bin/* $(RELEASE_DIR)/usr/bin/
 	cd $(RELEASE_DIR) && tar -czvf $(RELEASE_FILE) *
 
 version:
