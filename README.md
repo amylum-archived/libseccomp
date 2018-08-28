@@ -1,7 +1,7 @@
 libseccomp
 ==========
 
-[![Build Status](https://img.shields.io/circleci/project/amylum/libseccomp/master.svg)](https://circleci.com/gh/amylum/libseccomp)
+[![Build Status](https://img.shields.io/travis/com/amylum/libseccomp.svg)](https://travis-ci.com/amylum/libseccomp)
 [![GitHub release](https://img.shields.io/github/release/amylum/libseccomp.svg)](https://github.com/amylum/libseccomp/releases)
 [![LGPL Licensed](http://img.shields.io/badge/license-LGPL-green.svg)](https://tldrlegal.com/license/gnu-lesser-general-public-license-v2.1-(lgpl-2.1))
 
